@@ -1,0 +1,196 @@
+{% extends "network/layout.html" %}
+
+{% block body %}
+
+    <h2>All Posts</h2>
+    {% if user.is_authenticated %}
+        <div class="card">
+            <h3>New Post</h3>
+            <form action="newPost" method="POST">
+                {% csrf_token %}
+                <textarea class="form-control" name="postContent" placeholder="In my humble opinion..."></textarea>
+                <button type="submit" class="btn btn-info btn-block">post</button>
+            </form>
+        </div>
+    {% endif %}
+
+    <!-- top paginator -->
+    {% if pagePosts.has_other_pages %}
+    <div class="row p-2">
+        <div class="col-4">
+            <ul class="pagination pagination-sm">
+                <li class="page-item {% if not pagePosts.has_previous %}disabled{% endif %}">
+                    <a class="page-link" href="{% if pagePosts.has_previous %}?page={{ pagePosts.previous_page_number }}{% endif %}">previous</a>
+                </li>
+                <li class="page-item disabled">
+                    <a class="page-link">page {{ pagePosts.number }} of {{ pagePosts.paginator.num_pages }}</a>
+                </li>
+                <li class="page-item {% if not pagePosts.has_next %}disabled{% endif %}">
+                    <a class="page-link" href="{% if pagePosts.has_next %}?page={{ pagePosts.next_page_number }}{% endif %}">next</a>
+                </li>
+            </ul>
+        </div>
+
+        <div class="col-4 d-flex justify-content-center">
+            <ul class="pagination pagination-sm">
+                <li class="page-item {% if pagePosts.number == 1 %}active{% endif %}">
+                    <a class="page-link" href="?page=1">first page</a>
+                </li>
+                {% if pagePosts.number > 3 %}
+                    <li class="page-item disabled"><a class="page-link">...</a></li>
+                {% endif %}
+
+                {% for current_page in pagePosts.paginator.page_range|slice:"1:-1" %}
+                    {% if current_page == pagePosts.number %}
+                        <li class="page-item active"><a class="page-link">{{ current_page }}</a></li>
+                    {% elif current_page > pagePosts.number|add:'-2' and current_page < pagePosts.number|add:'2' %}
+                        <li class="page-item"><a class="page-link" href="?page={{ current_page }}">{{ current_page }}</a></li>
+                    {% endif %}
+                {% endfor %}
+
+                {% if pagePosts.number < pagePosts.paginator.num_pages|add:'-2' %}
+                    <li class="page-item disabled"><a class="page-link">...</a></li>
+                {% endif %}
+                <li class="page-item {% if pagePosts.number == pagePosts.paginator.num_pages %}active{% endif %}">
+                    <a class="page-link" href="?page={{ pagePosts.paginator.num_pages }}">last page</a>
+                </li>
+            </ul>
+        </div>
+    </div>
+    {% endif %}
+
+    <div class="pagePosts">
+        {% for post in pagePosts %}
+        <div class="col-10">
+            <div class="card">
+                <div class="row g-0">
+                    <div class="col-md-1">
+                        <img src="{{ post.author.userinformation.img }}" class="img-fluid rounded-start" alt="{{ post.author }}" onError="this.src='/static/network/no_photo.png'">
+                    </div>
+                    <div class="col-md-11">
+                        <div class="card-header">
+                            <div class="row">
+                                <div class="col-7 supAuthor">
+                                    <a class="textStyleHead" href="{% url 'profile' user_id=post.author.id %}">{{ post.author }}</a>
+                                </div>
+                                <div class="col-5 supTime">
+                                    {{ post.date }}
+                                </div>
+                            </div>
+                        </div>
+                        <div class="card-body">
+                            <div class="row">
+                                <div class="col-11">
+                                    <p class="card-text textStyleBody" id="textEditPost{{ post.id }}">{{ post.text }}</p>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="card-footer">
+                            <div class="row">
+
+                                <div class="col-6">
+                                    {% if user.is_authenticated and user.username != post.author.username %}
+                                        <div class="buttonsLikeDislike hstack">
+                                            <button id="likeButton{{ post.id }}" data-id="{{ post.id }}" name="like" class="btn {% if post.check_like %}btn-success{% else %}btn-outline-success{% endif %} likeBtn">
+                                                <data id="likeStatus{{ post.id }}" value="{{ post.check_like }}" hidden></data>
+                                                <span id="likeCounter{{ post.id }}">{{ post.likes|length }}</span>
+                                                <img id="likeImage{{ post.id }}" class="imgLike" {% if post.check_like %}src="/static/network/like_active.png"{% else %}src="/static/network/like_no_active.png"{% endif %} alt="like">
+                                            </button>
+                                            <button id="dislikeButton{{ post.id }}" data-id="{{ post.id }}" name="dislike" class="btn {% if post.check_dislike %}btn-danger{% else %}btn-outline-danger{% endif %} likeBtn">
+                                                <data id="dislikeStatus{{ post.id }}" value="{{ post.check_dislike }}" hidden></data>
+                                                <img id="dislikeImage{{ post.id }}" class="imgLike" {% if post.check_dislike %}src="/static/network/dislike_active.png"{% else %}src="/static/network/dislike_no_active.png"{% endif %} alt="dislike">
+                                                <span id="dislikeCounter{{ post.id }}">{{ post.dislikes|length }}</span>
+                                            </button>
+                                        </div>
+                                    {% else %}
+                                        <div class="hstack">
+                                            <button class="btn btn-outline-success likeBtn">
+                                                <span>{{ post.likes|length }}</span>
+                                                <img class="imgLike" {% if post.likes|length !=  0 %}src="/static/network/like_active.png"{% else %}src="/static/network/like_no_active.png"{% endif %} alt="like">
+                                            </button>
+                                            <button class="btn btn-outline-danger likeBtn">
+                                                <img class="imgLike" {% if post.dislikes|length !=  0 %}src="/static/network/dislike_active.png"{% else %}src="/static/network/dislike_no_active.png"{% endif %} alt="dislike">
+                                                <span>{{ post.dislikes|length }}</span>
+                                            </button>
+                                        </div>
+                                    {% endif %}
+                                </div>
+
+
+                                <div class="col-6">
+                                    <div class="row" style="flex-direction: row-reverse">
+                                        {% if user.username == post.author.username %}
+                                            <button type="button" class="btn btn-info btn-sm btn-block" data-bs-toggle="offcanvas" data-bs-target="#editPost" aria-controls="offcanvasRight">
+                                                Edit post
+                                            </button>
+                                            <!-- edit window -->
+                                            <div class="offcanvas offcanvas-end" tabindex="-1" id="editPost" aria-labelledby="offcanvasRightLabel">
+                                                <div class="offcanvas-header">
+                                                    <h5 class="offcanvas-title" id="offcanvasRightLabel">Post editor</h5>
+                                                    <button type="button" class="btn-close" data-bs-dismiss="offcanvas" aria-label="Close"></button>
+                                                </div>
+                                                <div class="offcanvas-body small">
+                                                    <textarea class="form-control" name="postEditContent" id="editPost{{ post.id }}">{{ post.text }}</textarea>
+                                                    <button type="button" class="btn btn-primary btn-block saveEditButton" onclick="submit_edit({{ post.id }})" data-bs-dismiss="offcanvas">Save</button>
+                                                    <button type="button" class="btn btn-secondary btn-block" data-bs-dismiss="offcanvas">Close</button>
+                                                </div>
+                                            </div>
+                                        {% endif %}
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+        {% endfor %}
+    </div>
+
+    <!-- bottom paginator -->
+    {% if pagePosts.has_other_pages %}
+    <div class="row p-2">
+        <div class="col-4 ">
+            <ul class="pagination pagination-sm">
+                <li class="page-item {% if not pagePosts.has_previous %}disabled{% endif %}">
+                    <a class="page-link" href="{% if pagePosts.has_previous %}?page={{ pagePosts.previous_page_number }}{% endif %}">previous</a>
+                </li>
+                <li class="page-item disabled">
+                    <a class="page-link">page {{ pagePosts.number }} of {{ pagePosts.paginator.num_pages }}</a>
+                </li>
+                <li class="page-item {% if not pagePosts.has_next %}disabled{% endif %}">
+                    <a class="page-link" href="{% if pagePosts.has_next %}?page={{ pagePosts.next_page_number }}{% endif %}">next</a>
+                </li>
+            </ul>
+        </div>
+
+        <div class="col-4 d-flex justify-content-center">
+            <ul class="pagination pagination-sm">
+                <li class="page-item {% if pagePosts.number == 1 %}active{% endif %}">
+                    <a class="page-link" href="?page=1">first page</a>
+                </li>
+                {% if pagePosts.number > 3 %}
+                    <li class="page-item disabled"><a class="page-link">...</a></li>
+                {% endif %}
+
+                {% for current_page in pagePosts.paginator.page_range|slice:"1:-1" %}
+                    {% if current_page == pagePosts.number %}
+                        <li class="page-item active"><a class="page-link">{{ current_page }}</a></li>
+                    {% elif current_page > pagePosts.number|add:'-2' and current_page < pagePosts.number|add:'2' %}
+                        <li class="page-item"><a class="page-link" href="?page={{ current_page }}">{{ current_page }}</a></li>
+                    {% endif %}
+                {% endfor %}
+
+                {% if pagePosts.number < pagePosts.paginator.num_pages|add:'-2' %}
+                    <li class="page-item disabled"><a class="page-link">...</a></li>
+                {% endif %}
+                <li class="page-item {% if pagePosts.number == pagePosts.paginator.num_pages %}active{% endif %}">
+                    <a class="page-link" href="?page={{ pagePosts.paginator.num_pages }}">last page</a>
+                </li>
+            </ul>
+        </div>
+    </div>
+    {% endif %}
+
+{% endblock %}
+

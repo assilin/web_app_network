@@ -1,0 +1,65 @@
+{% extends "network/layout.html" %}
+
+{% block body %}
+    <h5>Edit Profile</h5>
+    {% if message %}
+        <div>{{ message }}</div>
+    {% endif %}
+    <form action="{% url 'editProfile' user_id=user.id  %}" method="POST">
+        {% csrf_token %}
+        <div class="card mb-3" style="max-width: 1200px;">
+            <div class="row g-0">
+                <div class="col-md-4">
+                    <img src="{{ userInfo.img }}" class="img-fluid rounded-start" alt="{{ userInfo.userinfo_id.username }}" onError="this.src='/static/network/no_photo.png'">
+                </div>
+                <div class="col-md-8">
+                    <div class="card-body">
+                        <div class="form-group">
+                            <label>Username:</label>
+                            <input class="form-control" autofocus type="text" name="username" placeholder="Username" value="{{ userInfo.userinfo_id.username }}">
+                            <br/>
+                        </div>
+                        <div class="form-group">
+                            <label>Name:</label>
+                            <input class="form-control" autofocus type="text" name="firstName" placeholder="First Name" value="{{ userInfo.userinfo_id.first_name }}">
+                            <br/>
+                        </div>
+                        <div class="form-group">
+                            <label>Surname:</label>
+                            <input class="form-control" autofocus type="text" name="lastName" placeholder="Last Name" value="{{ userInfo.userinfo_id.last_name }}">
+                            <br/>
+                        </div>
+                        <div class="form-group">
+                            <label>Email:</label>
+                            <input class="form-control" type="email" name="email" placeholder="Email Address" value="{{ userInfo.userinfo_id.email }}">
+                            <br/>
+                        </div>
+                        <div class="form-group">
+                            <label>Password:</label>
+                            <input class="form-control" type="password" name="password" placeholder="Password">
+                        </div>
+                        <div class="form-group">
+                            <input class="form-control" type="password" name="confirmation" placeholder="Confirm Password">
+                            <br/>
+                        </div>
+                        <div class="form-group">
+                            <input class="form-control" type="text" name="imageURL" placeholder="URL with your picture" value="{{ userInfo.img }}">
+                            <br/>
+                        </div>
+                        <div class="form-group">
+                            <label>Date of Birth:</label>
+                            <input class="form-control" type="date" name="dateOfBirth" value="{{ userInfo.date_of_birth|date:'Y-m-d' }}">
+                            <br/>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            <div class="row g-0">
+                <label>Tell about yourself:</label>
+                <textarea class="form-control" name="about">{{ userInfo.about }}</textarea>
+            </div>
+        </div>
+        <input class="btn btn-primary" type="submit" value="Save changes">
+    </form>
+{% endblock %}
+

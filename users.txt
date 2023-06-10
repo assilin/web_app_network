@@ -1,0 +1,13 @@
+network_admin       2023Ad
+User1               2023Us2023
+
+
+                            {% if isFollow %}
+                                <button type="submit" class="btn btn-sucsess followButton btn-block" {% if not user.is_authenticated %}hidden{% endif %}>
+                                    Unfollow {{ profileUser }}
+                                </button>
+                            {% else %}
+                                <button type="submit" class="btn btn-danger followButton btn-block" {% if not user.is_authenticated %}hidden{% endif %}>
+                                    Follow {{ profileUser }}
+                                </button>
+                            {% endif %}

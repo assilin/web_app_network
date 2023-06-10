@@ -1,0 +1,61 @@
+body {
+    background: url("/static/network/background_blur.jpg");
+    background-attachment: fixed;
+    background-position: top left;
+    background-size: auto auto;
+    color: white;
+}
+
+.body {
+    padding: 10px 20px;
+}
+.navbar-brand {
+    height: 80px;
+}
+.imgLogo {
+    height: 100%;
+    width: auto;
+    margin: 0 25px 0 0;
+}
+
+/* temprorary */
+.adminLink {
+    background-color: red;
+    font-weight: 500;
+}
+
+.divideLine {
+    margin: 3px 0;
+}
+.card {
+    padding: 10px 20px;
+    margin: 10px 30px;
+    background-color: #e8eef3d8;
+}
+.card-header, .card-footer {
+    padding: 0 20px;
+}
+.textStyleHead {}
+.textStyleBody {}
+.supAuthor {}
+
+.supTime {
+    text-align: right;
+}
+.btn-block {
+    width: 150px;
+    margin: 5px 5px 0 0;
+}
+
+.likeBtn {
+    margin: 5px 5px 5px 0;
+}
+
+.imgLike {
+    height: 30px;
+    width: auto;
+}
+
+.form-group {
+    margin-top: 5px;
+}
